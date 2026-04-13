@@ -2,96 +2,97 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Calc</title>
 
 <style>
-:root{
-  --bg:#000;
-  --btn:#1c1c1e;
-  --btn2:#2c2c2e;
-  --orange:#ff9f0a;
-  --text:#fff;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  touch-action: manipulation;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body{
-  margin:0;
-  background:var(--bg);
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+/* FULL SCREEN CONTAINER */
+.app {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
 }
 
-.app{
-  width:340px;
+/* SCREEN */
+.screen {
+  color: white;
+  font-size: 72px;
+  text-align: right;
+  padding: 20px 10px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: hidden;
 }
 
-.screen{
-  color:var(--text);
-  font-size:64px;
-  text-align:right;
-  padding:20px 10px 30px;
-  min-height:90px;
-  overflow:hidden;
+/* KEYS */
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding-bottom: 20px;
 }
 
-.keys{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
+button {
+  border: none;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 26px;
+  color: white;
+  background: #1c1c1e;
+  position: relative;
+  transition: transform .1s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-button{
-  border:none;
-  height:72px;
-  border-radius:50%;
-  font-size:26px;
-  color:var(--text);
-  background:var(--btn);
-  position:relative;
-  transition:transform .12s ease, filter .12s ease;
-  box-shadow:
-    0 6px 18px rgba(0,0,0,.5),
-    inset 0 1px 1px rgba(255,255,255,.06);
+button:active {
+  transform: scale(0.92);
 }
 
-/* glow subtil dynamique */
-button::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.15), transparent 60%);
-  opacity:.4;
-}
-
-/* press feel */
-button:active{
-  transform:scale(.92);
-  filter:brightness(1.2);
+/* glow */
+button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent 60%);
+  opacity: 0.6;
 }
 
 /* operators */
-.op{
-  background:var(--orange);
-  color:#fff;
-  box-shadow:0 6px 20px rgba(255,159,10,.3);
+.op {
+  background: #ff9f0a;
 }
 
-.zero{
-  grid-column:span 2;
-  border-radius:36px;
-  text-align:left;
-  padding-left:28px;
+/* zero */
+.zero {
+  grid-column: span 2;
+  border-radius: 40px;
+  text-align: left;
+  padding-left: 28px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="app" id="app">
+
   <div class="screen" id="screen">0</div>
 
   <div class="keys">
@@ -117,27 +118,31 @@ button:active{
 
     <button class="zero" onclick="input('0')">0</button>
   </div>
+
 </div>
 
 <script>
 let screen = document.getElementById("screen");
 
 function input(v){
-  if(screen.innerText==="0") screen.innerText="";
+  if(screen.innerText === "0") screen.innerText = "";
   screen.innerText += v;
 }
 
 function reset(){
-  screen.innerText="0";
+  screen.innerText = "0";
 }
 
 function calc(){
   try{
     screen.innerText = eval(screen.innerText);
-  }catch{
-    screen.innerText="Error";
+  } catch {
+    screen.innerText = "Error";
   }
 }
+
+/* OPTIONAL: reduce browser UI interaction feel */
+document.addEventListener("touchmove", e => e.preventDefault(), { passive:false });
 </script>
 
 </body>
