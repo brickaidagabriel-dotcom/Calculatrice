@@ -1,379 +1,143 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Calculatrice</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calculator</title>
+
 <style>
-  *, *::before, *::after {
-    margin: 0; padding: 0; box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-  html, body {
-    width: 100%; height: 100%;
-    background: #000;
-    overflow: hidden;
-  }
-  body {
-    display: flex;
-    justify-content: center;
-  }
-
-/* ── Wrapper ── */
-.app {
-width: 100%;
-max-width: 430px;
-height: 100dvh;
-background: #000;
-display: flex;
-flex-direction: column;
+:root{
+  --bg:#000;
+  --btn:#1c1c1e;
+  --btn2:#2c2c2e;
+  --orange:#ff9f0a;
+  --text:#fff;
 }
 
-/* ── Display ── */
-.display {
-flex: 1;
-display: flex;
-flex-direction: column;
-justify-content: flex-end;
-align-items: flex-end;
-padding: 0 24px 20px 24px;
-overflow: hidden;
+body{
+  margin:0;
+  background:var(--bg);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
-.expr-line {
-font-family: -apple-system, “SF Pro Display”, “Helvetica Neue”, sans-serif;
-font-size: 22px;
-font-weight: 300;
-color: rgba(255,255,255,0.35);
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-max-width: 100%;
-min-height: 28px;
+.app{
+  width:340px;
 }
 
-.main-num {
-font-family: -apple-system, “SF Pro Display”, “Helvetica Neue”, sans-serif;
-font-size: 96px;
-font-weight: 300;
-color: #fff;
-line-height: 1;
-letter-spacing: -4px;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-max-width: 100%;
-}
-.main-num.s1 { font-size: 76px; letter-spacing: -3px; }
-.main-num.s2 { font-size: 58px; letter-spacing: -2px; }
-.main-num.s3 { font-size: 42px; letter-spacing: -1px; }
-
-/* ── Grille ──
-Layout exact de l’image 2 :
-Ligne 1 : ⌫  AC  %  ÷
-Ligne 2 : 7   8   9  ×
-Ligne 3 : 4   5   6  −
-Ligne 4 : 1   2   3  +
-Ligne 5 : +/- 0   ,  =
-*/
-.grid {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: clamp(7px, 1.9vw, 10px);
-padding: clamp(7px, 1.9vw, 10px);
-padding-bottom: max(clamp(7px, 1.9vw, 10px), env(safe-area-inset-bottom, 8px));
+.screen{
+  color:var(--text);
+  font-size:64px;
+  text-align:right;
+  padding:20px 10px 30px;
+  min-height:90px;
+  overflow:hidden;
 }
 
-/* ── Bouton base ── */
-.btn {
-aspect-ratio: 1 / 1;
-border-radius: 50%;
-border: none;
-cursor: pointer;
-outline: none;
-display: flex;
-align-items: center;
-justify-content: center;
-font-family: -apple-system, “SF Pro Display”, “Helvetica Neue”, sans-serif;
-font-weight: 400;
-color: #fff;
-user-select: none;
--webkit-user-select: none;
-will-change: transform;
--webkit-font-smoothing: antialiased;
+.keys{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
 }
 
-/* ── Couleurs exactes image 2 ── */
-/* Gris  : #636366  (⌫ AC %) */
-.gray   {
-background-color: #636366;
-box-shadow: inset 0 1.5px 0.8px rgba(255,255,255,0.20);
-}
-/* Dark  : #2c2c2e  (chiffres, +/-, virgule) */
-.dark   {
-background-color: #2c2c2e;
-box-shadow: inset 0 1.5px 0.8px rgba(255,255,255,0.09);
-}
-/* Orange : #e8952c  — orange désaturé et chaud de l’image 2, pas trop vif */
-.orange {
-background-color: #e8952c;
-box-shadow: inset 0 1.5px 0.8px rgba(255,255,255,0.22);
+button{
+  border:none;
+  height:72px;
+  border-radius:50%;
+  font-size:26px;
+  color:var(--text);
+  background:var(--btn);
+  position:relative;
+  transition:transform .12s ease, filter .12s ease;
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.5),
+    inset 0 1px 1px rgba(255,255,255,.06);
 }
 
-/* Opérateur actif : fond blanc, symbole orange */
-.orange.op-active {
-background-color: #fff;
-color: #e8952c;
-box-shadow: inset 0 1.5px 0.8px rgba(232,149,44,0.15);
+/* glow subtil dynamique */
+button::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.15), transparent 60%);
+  opacity:.4;
 }
 
-/* ── Tailles des contenus ── */
-
-/* Chiffres */
-.digit-btn {
-font-size: clamp(26px, 7.5vw, 36px);
-font-weight: 400;
+/* press feel */
+button:active{
+  transform:scale(.92);
+  filter:brightness(1.2);
 }
 
-/* ⌫ backspace SVG */
-.bk-icon {
-width: clamp(28px, 8vw, 38px);
-height: auto;
-pointer-events: none;
-display: block;
+/* operators */
+.op{
+  background:var(--orange);
+  color:#fff;
+  box-shadow:0 6px 20px rgba(255,159,10,.3);
 }
 
-/* AC */
-.ac-btn {
-font-size: clamp(22px, 6.5vw, 30px);
-font-weight: 500;
-letter-spacing: -0.3px;
-}
-
-/* % */
-.pct-btn {
-font-size: clamp(22px, 6.5vw, 30px);
-font-weight: 400;
-}
-
-/* Opérateurs ÷ × − + = */
-.op-btn {
-font-size: clamp(28px, 9vw, 42px);
-font-weight: 300;
-line-height: 1;
-}
-
-/* +/- */
-.pm-btn {
-font-size: clamp(18px, 5vw, 24px);
-font-weight: 400;
-}
-
-/* Virgule */
-.dot-btn {
-font-size: clamp(28px, 9vw, 42px);
-font-weight: 500;
-padding-top: 3px;
-line-height: 1;
+.zero{
+  grid-column:span 2;
+  border-radius:36px;
+  text-align:left;
+  padding-left:28px;
 }
 </style>
-
 </head>
+
 <body>
+
 <div class="app">
+  <div class="screen" id="screen">0</div>
 
-  <!-- DISPLAY -->
+  <div class="keys">
+    <button onclick="reset()">AC</button>
+    <button onclick="input('/')">÷</button>
+    <button onclick="input('*')">×</button>
+    <button class="op" onclick="input('-')">−</button>
 
-  <div class="display">
-    <div class="expr-line" id="expr"></div>
-    <div class="main-num"  id="num">0</div>
-  </div>
+    <button onclick="input('7')">7</button>
+    <button onclick="input('8')">8</button>
+    <button onclick="input('9')">9</button>
+    <button class="op" onclick="input('+')">+</button>
 
-  <!-- GRILLE 4×5 — ordre identique à l'image 2 -->
+    <button onclick="input('4')">4</button>
+    <button onclick="input('5')">5</button>
+    <button onclick="input('6')">6</button>
+    <button onclick="input('.')">.</button>
 
-  <div class="grid">
+    <button onclick="input('1')">1</button>
+    <button onclick="input('2')">2</button>
+    <button onclick="input('3')">3</button>
+    <button class="op" onclick="calc()">=</button>
 
-```
-<!-- Ligne 1 : ⌫  AC  %  ÷ -->
-<button class="btn gray" id="btn-back" aria-label="Effacer">
-  <svg class="bk-icon" viewBox="0 0 46 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 2H43a2 2 0 0 1 2 2v26a2 2 0 0 1-2 2H17L2 17 17 2z"
-          stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
-    <line x1="22" y1="11" x2="36" y2="25" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="36" y1="11" x2="22" y2="25" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  </svg>
-</button>
-<button class="btn gray   ac-btn"  id="btn-ac">AC</button>
-<button class="btn gray   pct-btn" id="btn-pct">%</button>
-<button class="btn orange op-btn"  id="btn-div">÷</button>
-
-<!-- Ligne 2 : 7  8  9  × -->
-<button class="btn dark digit-btn" id="btn-7">7</button>
-<button class="btn dark digit-btn" id="btn-8">8</button>
-<button class="btn dark digit-btn" id="btn-9">9</button>
-<button class="btn orange op-btn"  id="btn-mul">×</button>
-
-<!-- Ligne 3 : 4  5  6  − -->
-<button class="btn dark digit-btn" id="btn-4">4</button>
-<button class="btn dark digit-btn" id="btn-5">5</button>
-<button class="btn dark digit-btn" id="btn-6">6</button>
-<button class="btn orange op-btn"  id="btn-sub">−</button>
-
-<!-- Ligne 4 : 1  2  3  + -->
-<button class="btn dark digit-btn" id="btn-1">1</button>
-<button class="btn dark digit-btn" id="btn-2">2</button>
-<button class="btn dark digit-btn" id="btn-3">3</button>
-<button class="btn orange op-btn"  id="btn-add">+</button>
-
-<!-- Ligne 5 : +/-  0  ,  = -->
-<button class="btn gray   pm-btn"  id="btn-pm">+/-</button>
-<button class="btn dark digit-btn" id="btn-0">0</button>
-<button class="btn dark   dot-btn" id="btn-dot">,</button>
-<button class="btn orange op-btn"  id="btn-eq">=</button>
-```
-
+    <button class="zero" onclick="input('0')">0</button>
   </div>
 </div>
 
 <script>
-(function () {
-  let cur = '0', first = null, op = null;
-  let waitNext = false, justCalc = false, expr = '';
+let screen = document.getElementById("screen");
 
-  const numEl  = document.getElementById('num');
-  const exprEl = document.getElementById('expr');
+function input(v){
+  if(screen.innerText==="0") screen.innerText="";
+  screen.innerText += v;
+}
 
-  function fmt(v) {
-    if (v === 'ERR') return 'Erreur';
-    let s = v.toString();
-    let neg = s[0] === '-';
-    let body = neg ? s.slice(1) : s;
-    let [int, dec] = body.split('.');
-    int = int.replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
-    let r = (neg ? '−' : '') + int;
-    if (dec !== undefined) r += ',' + dec;
-    else if (s.endsWith('.')) r += ',';
-    return r;
-  }
+function reset(){
+  screen.innerText="0";
+}
 
-  function render() {
-    numEl.textContent  = fmt(cur);
-    exprEl.textContent = expr;
-    const L = numEl.textContent.replace(/[\s\u202f,−]/g, '').length;
-    numEl.className = 'main-num' + (L > 12 ? ' s3' : L > 9 ? ' s2' : L > 6 ? ' s1' : '');
+function calc(){
+  try{
+    screen.innerText = eval(screen.innerText);
+  }catch{
+    screen.innerText="Error";
   }
-
-  function compute(a, o, b) {
-    a = parseFloat(a); b = parseFloat(b);
-    if (o === '+') return a + b;
-    if (o === '−') return a - b;
-    if (o === '×') return a * b;
-    if (o === '÷') return b === 0 ? 'ERR' : a / b;
-  }
-  function tidy(n) {
-    if (n === 'ERR') return 'ERR';
-    return parseFloat(n.toPrecision(12)).toString();
-  }
-
-  const opMap = { '÷':'btn-div', '×':'btn-mul', '−':'btn-sub', '+':'btn-add' };
-  function hiliteOp(o) {
-    Object.values(opMap).forEach(id => document.getElementById(id).classList.remove('op-active'));
-    if (o && opMap[o]) document.getElementById(opMap[o]).classList.add('op-active');
-  }
-
-  function animTap(el) {
-    el.style.transition = 'transform 0.07s ease, filter 0.07s';
-    el.style.transform  = 'scale(0.88)';
-    el.style.filter     = 'brightness(1.35)';
-    setTimeout(() => {
-      el.style.transform = 'scale(1)';
-      el.style.filter    = '';
-      setTimeout(() => { el.style.transition = ''; }, 110);
-    }, 80);
-  }
-
-  function doDigit(v) {
-    if (waitNext || justCalc) {
-      cur = v; waitNext = false; justCalc = false; hiliteOp(null);
-    } else {
-      if (cur === '0' && v !== '0') cur = v;
-      else if (cur === '0' && v === '0') {}
-      else if (cur.replace(/[-.\u202f]/g, '').length < 9) cur += v;
-    }
-    expr = '';
-  }
-  function doDecimal() {
-    if (waitNext || justCalc) { cur = '0.'; waitNext = false; justCalc = false; hiliteOp(null); }
-    else if (!cur.includes('.')) cur += '.';
-    expr = '';
-  }
-  function doBack() {
-    if (justCalc) { cur = '0'; justCalc = false; }
-    else { cur = cur.length > 1 ? cur.slice(0, -1) : '0'; }
-    expr = '';
-  }
-  function doAC() {
-    cur = '0'; first = null; op = null;
-    waitNext = false; justCalc = false; expr = '';
-    hiliteOp(null);
-  }
-  function doOp(newOp) {
-    if (justCalc) justCalc = false;
-    if (first !== null && !waitNext) {
-      let r = compute(first, op, cur);
-      if (r === 'ERR') { cur = 'ERR'; first = null; op = null; expr = ''; render(); return; }
-      cur = tidy(r); first = cur;
-    } else { first = cur; }
-    op = newOp; waitNext = true; hiliteOp(newOp); expr = '';
-  }
-  function doEqual() {
-    if (op && first !== null) {
-      expr = fmt(first) + ' ' + op + ' ' + fmt(cur) + ' =';
-      let r = compute(first, op, cur);
-      cur = r === 'ERR' ? 'ERR' : tidy(r);
-      first = null; op = null; waitNext = false; justCalc = true;
-      hiliteOp(null);
-    }
-  }
-  function doPM() {
-    if (cur !== '0' && cur !== 'ERR')
-      cur = cur[0] === '-' ? cur.slice(1) : '-' + cur;
-  }
-  function doPct() {
-    let n = parseFloat(cur);
-    if (!isNaN(n)) {
-      if (first !== null && (op === '+' || op === '−')) cur = tidy(parseFloat(first) * n / 100);
-      else cur = tidy(n / 100);
-    }
-  }
-
-  const actions = {
-    'btn-back': doBack,   'btn-ac': doAC,       'btn-pct': doPct,
-    'btn-div':  () => doOp('÷'),
-    'btn-7': () => doDigit('7'), 'btn-8': () => doDigit('8'), 'btn-9': () => doDigit('9'),
-    'btn-mul':  () => doOp('×'),
-    'btn-4': () => doDigit('4'), 'btn-5': () => doDigit('5'), 'btn-6': () => doDigit('6'),
-    'btn-sub':  () => doOp('−'),
-    'btn-1': () => doDigit('1'), 'btn-2': () => doDigit('2'), 'btn-3': () => doDigit('3'),
-    'btn-add':  () => doOp('+'),
-    'btn-pm':   doPM,
-    'btn-0':    () => doDigit('0'),
-    'btn-dot':  doDecimal,
-    'btn-eq':   doEqual,
-  };
-
-  Object.entries(actions).forEach(([id, fn]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('touchstart', e => {
-      e.preventDefault(); animTap(el); fn(); render();
-    }, { passive: false });
-    el.addEventListener('click', () => { animTap(el); fn(); render(); });
-  });
-
-  render();
-})();
+}
 </script>
 
 </body>
